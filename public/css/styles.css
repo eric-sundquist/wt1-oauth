@@ -1,0 +1,28 @@
+
+html {
+    position: relative;
+    min-height: 100%;
+  }
+
+  body > .container {
+    padding: 60px 15px 0;
+  }
+  
+.myForm {
+  max-width: 450px;
+}
+
+.margTop {
+  margin-top: 1rem;
+}
+
+.myBtn {
+  background-color: transparent;
+  border: none;
+  padding: 0.5rem;
+  color: rgba(255,255,255,.55);
+}
+
+nav {
+  padding-left: 1rem;
+}

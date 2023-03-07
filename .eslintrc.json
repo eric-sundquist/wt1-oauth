@@ -1,0 +1,7 @@
+{
+  "extends": ["@lnu", "some-other-config-you-use", "prettier"],
+  "rules": {
+    "indent": "error",
+    "space-before-function-paren": "off"
+  }
+}

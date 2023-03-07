@@ -1,0 +1,10 @@
+<h1><%= viewData?.title %></h1>
+<div>
+  <textarea class="col-md-12" id="snippetInput" name="content" disabled
+    placeholder="Enter your snippet here..." required="required" autofocus="autofocus" cols="60" rows="10"><%= viewData?.content %></textarea>
+
+    <% if (isOwner) { %>
+      <a href="./snippets/<%= viewData?.id %>/update"><button class="btn btn-primary">Update</button></a>
+      <a href="./snippets/<%= viewData?.id %>/delete"><button class="btn btn-primary">Delete</button></a>
+    <% } %>
+</div>
