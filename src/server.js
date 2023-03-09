@@ -9,6 +9,7 @@ dotenv.config()
 import express from 'express'
 import expressLayouts from 'express-ejs-layouts'
 import logger from 'morgan'
+import session from 'express-session'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { router } from './routes/router.js'
@@ -45,7 +46,40 @@ try {
   // Serve static files.
   app.use(express.static(join(directoryFullName, '..', 'public')))
 
+  // Setup and use session middleware (https://github.com/expressjs/session)
+  const sessionOptions = {
+    name: process.env.SESSION_NAME,
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      sameSite: 'strict'
+    }
+  }
+
+  if (app.get('env') === 'production') {
+    app.set('trust proxy', 1) // trust first proxy
+    sessionOptions.cookie.secure = true // serve secure cookies
+  }
+
+  app.use(session(sessionOptions))
+
+  // Middleware to be executed before the routes.
   app.use((req, res, next) => {
+    // Flash messages - survives only a round trip.
+    // if (req.session.flash) {
+    //   res.locals.flash = req.session.flash
+    //   delete req.session.flash
+    // }
+
+    // Give view know if user is authenticated.
+    // if (req.session.username) {
+    //   res.locals.isAuthenticated = true
+    // } else {
+    //   res.locals.isAuthenticated = false
+    // }
+
     // Pass the base URL to the views.
     res.locals.baseURL = baseURL
     next()
