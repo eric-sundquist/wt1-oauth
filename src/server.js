@@ -19,7 +19,17 @@ try {
 
   const app = express()
 
-  app.use(helmet())
+  // Use and config Helmet.
+  app.use(
+    helmet({
+      crossOriginEmbedderPolicy: false
+    }),
+    helmet.contentSecurityPolicy({
+      directives: {
+        'img-src': ["'self'", 'gitlab.lnu.se']
+      }
+    })
+  )
 
   // Get the directory name of this module's path.
   const directoryFullName = dirname(fileURLToPath(import.meta.url))
@@ -66,7 +76,6 @@ try {
   // Middleware to be executed before the routes.
   app.use((req, res, next) => {
     // Give view know if user is authenticated.
-    console.log(req.session)
     if (req.session.authData) {
       res.locals.isAuthenticated = true
     } else {

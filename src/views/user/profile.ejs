@@ -1,18 +1,16 @@
 <h1>Profile</h1>
 <div>
   <%= viewData?.title %>
-  <h4>GitLAb ID</h4>
-  <p>insert viewdata here</p>
-  <h4>Email</h4>
-  <p>insert viewdata here</p>
-  <h4>Name</h4>
-  <p>insert viewdata here</p>
-  <h4>Username</h4>
-  <p>insert viewdata here</p>
+  <h5>GitLab ID</h5>
+  <p><%= viewData?.id %></p>
+  <h5>Email</h5>
+  <p><%= viewData?.email %></p>
+  <h5>Name</h5>
+  <p><%= viewData?.name %></p>
+  <h5>Username</h5>
+  <p><%= viewData?.username %></p>
 
-  <h4>AVATAR BILD --HÄÄÄR--</h4>
-  <p>insert viewdata here</p>
-
-  <h4>Last activity</h4>
-  <p>insert viewdata here</p>
+  <img src="<%= viewData?.avatar_url %>" alt="avatar" width="100px" />
+  <h5>Last activity</h5>
+  <p><%= viewData?.last_activity_on %></p>
 </div>

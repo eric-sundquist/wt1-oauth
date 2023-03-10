@@ -52,14 +52,14 @@ export class AccountController {
       method: 'POST'
     })
 
-    const data = await response.json()
-
     if (!response.ok) {
       const error = new Error('Something went wrong during authentication')
       error.status = 500
       next(error)
       return
     }
+
+    const data = await response.json()
 
     req.session.regenerate((err) => {
       if (err) return next(err)

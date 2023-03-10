@@ -18,14 +18,92 @@ export class UserController {
    */
   async showProfile(req, res, next) {
     try {
+      //get access token
+      const accessToken = await this.getToken(req)
+
+      // fetch access token information
+      // const response = await fetch(`https://gitlab.lnu.se/oauth/token/info?access_token=${accessToken}`, {
+      //   method: 'get'
+      // })
+
+      // fetch oauth user information
+      // const response = await fetch(`https://gitlab.lnu.se/oauth/userinfo?access_token=${accessToken}`, {
+      //   method: 'get'
+      // })
+
       // fetch user information
-      const viewData = {}
+      const response = await fetch(`https://gitlab.lnu.se/api/v4/user?access_token=${accessToken}`, {
+        method: 'get'
+      })
+
+      if (!response.ok) {
+        throw new Error(`${response.status} - ${response.statusText} - Fetch from gitlab failed`)
+      }
+
+      const viewData = await response.json()
 
       res.render('user/profile', { viewData })
     } catch (error) {
       next(error)
     }
   }
+
+  async getToken(req) {
+    // om token expired generera ny med refreshtoken
+    const timeNow = Math.floor(Date.now() / 1000)
+    const tokenExpires = req.session.authData.expires_in + req.session.authData.created_at
+
+    // return req.session.authData.access_token
+    if (timeNow > tokenExpires - 10) {
+      const response = await fetch(
+        `https://gitlab.lnu.se/oauth/token?client_id=${process.env.GITLAB_APP_ID}&client_secret=${process.env.GITLAB_APP_SECRET}&refresh_token=${req.session.authData.refresh_token}&grant_type=refresh_token&redirect_uri=${process.env.GITLAB_REDIRECT_URI}`,
+        {
+          method: 'get'
+        }
+      )
+      if (!response.ok) {
+        const error = new Error('Something went wrong when refreshing token')
+        error.status = 500
+        next(error)
+        return
+      }
+
+      const data = await response.json()
+
+      req.session.authData = data
+
+      return data.access_token
+    } else {
+      return req.session.authData.access_token
+    }
+  }
+
+  /**
+   * Send http request to Picture it api.
+   *
+   * @param {string} method  - which http method to use.
+   * @param {string} route - set url route.
+   * @param {object} body - body to send as json.
+   */
+  async fetchPictureApi(method, route, token) {
+    const response = await fetch(`https://courselab.lnu.se/picture-it/images/api/v1/${route}`, {
+      method: method,
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Private-Token': process.env.PICTURE_IT_ACCESS_TOKEN
+      }
+    })
+    if (!response.ok) {
+      throw new Error(`${response.status} - ${response.statusText} - Fetch from Picture-It API failed`)
+    }
+
+    return response
+  }
+
+  // async fetchProfileData(req) {
+  //   const res = fetch()
+  // }
 
   /**
    * Displays activities.
