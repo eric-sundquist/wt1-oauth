@@ -26,7 +26,7 @@ try {
     }),
     helmet.contentSecurityPolicy({
       directives: {
-        'img-src': ["'self'", 'gitlab.lnu.se']
+        'img-src': ["'self'", 'gitlab.lnu.se', 'gravatar.com']
       }
     })
   )
