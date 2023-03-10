@@ -5,102 +5,93 @@
  * @version 1.0.0
  */
 
-import { User } from '../models/user.js'
+import { randomBytes } from 'crypto'
 
 /**
  * Encapsulates a controller.
  */
 export class AccountController {
   /**
-   * Renders a view and sends the rendered HTML string as an HTTP response.
-   * login GET.
+   * Redirect user to gitlab Oauth authorization page.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
    * @param {Function} next - Express next middleware function.
    */
-  login (req, res, next) {
-    res.render('account/login')
+  login(req, res, next) {
+    if (req.session.authStateToken === undefined) {
+      req.session.authStateToken = randomBytes(30).toString('hex')
+    }
+
+    const url = `https://gitlab.lnu.se/oauth/authorize?client_id=${process.env.GITLAB_APP_ID}&redirect_uri=${process.env.GITLAB_REDIRECT_URI}&response_type=code&state=${req.session.authStateToken}&scope=${process.env.GITLAB_SCOPE}`
+
+    res.redirect(url)
   }
 
   /**
-   * Login post request.
+   * Gitlab oauth flow to recieve access token.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
    * @param {Function} next - Express next middleware function.
    */
-  async loginPost (req, res, next) {
-    try {
-      const user = await User.authenticate(req.body.username, req.body.password)
+  async authGitlabGetAccessToken(req, res, next) {
+    // Verify that recieved state token is the same as sent
+    console.log(req.session.authStateToken)
+    console.log(req.query.state)
+    if (req.session.authStateToken !== req.query.state) {
+      const error = new Error('Something went wrong during authentication')
+      error.status = 500
+      next(error)
+      return
+    }
 
-      req.session.regenerate((err) => {
-        if (err) {
-          throw new Error('Failed to re-generate session.')
-        }
-        req.session.username = user.username
-        req.session.flash = { type: 'success', text: 'You have been logged in.' }
+    const url = `https://gitlab.lnu.se/oauth/token?client_id=${process.env.GITLAB_APP_ID}&client_secret=${process.env.GITLAB_APP_SECRET}&code=${req.query.code}&grant_type=authorization_code&redirect_uri=${process.env.GITLAB_REDIRECT_URI}`
 
-        // Redirect.
-        res.redirect('../snippets')
+    const response = await fetch(url, {
+      method: 'POST'
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      const error = new Error('Something went wrong during authentication')
+      error.status = 500
+      next(error)
+      return
+    }
+
+    await req.session.regenerate((err) => {
+      if (err) return next(err)
+
+      req.session.authData = data
+
+      // Making sure session is saved before redirect
+      req.session.save(function (err) {
+        if (err) return next(err)
+
+        res.redirect('/')
       })
-    } catch (error) {
-      req.session.flash = { type: 'danger', text: error.message }
-      res.redirect('../account/login')
-    }
+    })
   }
 
   /**
-   * Renders a view and sends the rendered HTML string as an HTTP response.
-   * register GET.
+   * Log out user and end session.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
    * @param {Function} next - Express next middleware function.
    */
-  register (req, res, next) {
-    res.render('account/register')
-  }
+  logout(req, res, next) {
+    req.session.authData = null
+    req.session.save(function (err) {
+      if (err) next(err)
 
-  /**
-   * Register post request.
-   *
-   * @param {object} req - Express request object.
-   * @param {object} res - Express response object.
-   * @param {Function} next - Express next middleware function.
-   */
-  async registerPost (req, res, next) {
-    try {
-      const user = new User({
-        username: req.body.username,
-        password: req.body.password
+      req.session.regenerate(function (err) {
+        if (err) next(err)
+        res.redirect('/')
       })
-
-      await user.save()
-
-      req.session.flash = { type: 'success', text: 'The user was created successfully.' }
-      res.redirect('./login')
-    } catch (error) {
-      req.session.flash = { type: 'danger', text: error.message }
-      res.redirect('./register')
-    }
-  }
-
-  /**
-   * Deletes the specified snippet.
-   *
-   * @param {object} req - Express request object.
-   * @param {object} res - Express response object.
-   */
-  async logoutPost (req, res) {
-    try {
-      req.session.destroy()
-      res.redirect('..')
-    } catch (error) {
-      // Redirect to the login form and display an error message. ...
-      req.session.flash = { type: 'danger', text: error.message }
-      res.redirect('..')
-    }
+    })
   }
 
   /**
@@ -110,8 +101,8 @@ export class AccountController {
    * @param {object} res - Express response object.
    * @param {Function} next - Express next middleware function.
    */
-  authLoggedIn (req, res, next) {
-    if (!req.session.username) {
+  authLoggedIn(req, res, next) {
+    if (!req.session.authData) {
       const error = new Error('Not Found')
       error.status = 404
       next(error)

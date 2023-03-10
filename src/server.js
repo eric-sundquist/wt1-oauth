@@ -66,10 +66,7 @@ try {
   // Middleware to be executed before the routes.
   app.use((req, res, next) => {
     // Give view know if user is authenticated.
-    // console.log('SERVER.Js')
-    // console.log(req.session.authData)
-    // console.log('isAuth?')
-    // console.log(req.session.isAuth)
+    console.log(req.session)
     if (req.session.authData) {
       res.locals.isAuthenticated = true
     } else {
