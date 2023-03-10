@@ -14,13 +14,15 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-        <li class="nav-item">
-          <a class="nav-link" href="./snippets/">Placeholder snippets</a>
-        </li>
-
         <% if (isAuthenticated) { %>
         <li class="nav-item">
-          <a class="nav-link" href="./profile">Profile (TODO)</a>
+          <a class="nav-link" href="./user/profile">Profile</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="./user/activities">Activities</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="./user/group-projects">Group Projects</a>
         </li>
         <li class="nav-item">
           <form action="./account/logout" method="POST">

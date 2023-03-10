@@ -5,12 +5,67 @@
  * @version 1.0.0
  */
 
-import { Snippet } from '../models/snippet.js'
-
 /**
  * Encapsulates a controller.
  */
-export class SnippetsController {
+export class UserController {
+  /**
+   * Displays user profile.
+   *
+   * @param {object} req - Express request object.
+   * @param {object} res - Express response object.
+   * @param {Function} next - Express next middleware function.
+   */
+  async showProfile(req, res, next) {
+    try {
+      // fetch user information
+      const viewData = {}
+
+      res.render('user/profile', { viewData })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  /**
+   * Displays activities.
+   *
+   * @param {object} req - Express request object.
+   * @param {object} res - Express response object.
+   * @param {Function} next - Express next middleware function.
+   */
+  async showActivities(req, res, next) {
+    try {
+      // fetch user information
+      const viewData = {}
+
+      res.render('user/activities', { viewData })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  /**
+   * Displays group-projects.
+   *
+   * @param {object} req - Express request object.
+   * @param {object} res - Express response object.
+   * @param {Function} next - Express next middleware function.
+   */
+  async showGroupProjects(req, res, next) {
+    try {
+      // fetch user information
+      const viewData = {}
+
+      res.render('user/group-projects', { viewData })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // ------------------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------
+
   /**
    * Displays snippet list.
    *

@@ -1,0 +1,26 @@
+<h1>Group Projects</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Title:</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (viewData?.snippets?.length) { %>
+      <% for (const snippet of viewData.snippets) { %>
+        <tr>
+        
+          <td class="w-100">
+            <a href="./snippets/<%= snippet.id %>/show""><%= snippet.title %></a>
+          </td>
+        </tr>
+      <% } %>
+    <% } else { %>
+      <tr>
+        <td colspan="3" class="text-center text-danger">
+          There are no projects to display
+        </td>
+      </tr>
+    <% } %>
+  </tbody>
+</table>

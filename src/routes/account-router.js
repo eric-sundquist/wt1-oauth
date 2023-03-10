@@ -14,5 +14,4 @@ const controller = new AccountController()
 
 router.get('/login', (req, res, next) => controller.login(req, res, next))
 router.get('/auth/gitlab', (req, res, next) => controller.authGitlabGetAccessToken(req, res, next))
-
 router.post('/logout', controller.authLoggedIn, (req, res, next) => controller.logout(req, res, next))
