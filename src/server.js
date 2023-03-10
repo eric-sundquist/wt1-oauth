@@ -11,12 +11,9 @@ import logger from 'morgan'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { router } from './routes/router.js'
-import { connectDB } from './config/mongoose.js'
 import helmet from 'helmet'
 
 try {
-  await connectDB()
-
   const app = express()
 
   // Use and config Helmet.
