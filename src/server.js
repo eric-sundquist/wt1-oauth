@@ -4,12 +4,10 @@
  * @author Eric Sundqvist
  * @version 1.0.0
  */
-import * as dotenv from 'dotenv'
-dotenv.config()
 import express from 'express'
 import expressLayouts from 'express-ejs-layouts'
-import logger from 'morgan'
 import session from 'express-session'
+import logger from 'morgan'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { router } from './routes/router.js'
@@ -17,7 +15,6 @@ import { connectDB } from './config/mongoose.js'
 import helmet from 'helmet'
 
 try {
-  dotenv.config({ path: '../' })
   await connectDB()
 
   const app = express()
@@ -53,8 +50,9 @@ try {
     resave: false,
     saveUninitialized: false,
     cookie: {
+      secure: false,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-      sameSite: 'strict'
+      sameSite: 'lax'
     }
   }
 
@@ -67,18 +65,16 @@ try {
 
   // Middleware to be executed before the routes.
   app.use((req, res, next) => {
-    // Flash messages - survives only a round trip.
-    // if (req.session.flash) {
-    //   res.locals.flash = req.session.flash
-    //   delete req.session.flash
-    // }
-
     // Give view know if user is authenticated.
-    // if (req.session.username) {
-    //   res.locals.isAuthenticated = true
-    // } else {
-    //   res.locals.isAuthenticated = false
-    // }
+    // console.log('SERVER.Js')
+    // console.log(req.session.authData)
+    // console.log('isAuth?')
+    // console.log(req.session.isAuth)
+    if (req.session.authData) {
+      res.locals.isAuthenticated = true
+    } else {
+      res.locals.isAuthenticated = false
+    }
 
     // Pass the base URL to the views.
     res.locals.baseURL = baseURL
