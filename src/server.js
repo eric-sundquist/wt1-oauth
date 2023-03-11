@@ -50,7 +50,6 @@ try {
   // Serve static files.
   app.use(express.static(join(directoryFullName, '..', 'public')))
 
-  // Setup and use session middleware (https://github.com/expressjs/session)
   const sessionOptions = {
     name: process.env.SESSION_NAME,
     secret: process.env.SESSION_SECRET,
@@ -72,7 +71,7 @@ try {
 
   // Middleware to be executed before the routes.
   app.use((req, res, next) => {
-    // Give view know if user is authenticated.
+    // Give view knowledge if user is authenticated.
     if (req.session.authData) {
       res.locals.isAuthenticated = true
     } else {
