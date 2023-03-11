@@ -4,15 +4,15 @@
   <% for (const group of viewData.groups.nodes) { %>
   <div class="card" style="margin-bottom: 1rem">
     <div class="card-body">
-      <h5 class="card-title"><a href="<%= group.webUrl %>"><%= group.name %></a></h5>
-
-      <% if (group.avatarUrl) { %>
-      <img src="<%= group.avatarUrl %>" width="30px" alt="avatar" />
-      <% } %>
+      <div style="display: flex">
+        <% if (group.avatarUrl) { %>
+        <img src="<%= group.avatarUrl %>" width="30px" alt="avatar" />
+        <% } %>
+        <h5 class="card-title"><a href="<%= group.webUrl %>"><%= group.name %></a></h5>
+      </div>
       <p class="card-text"><%= group.fullPath %></p>
 
       <% if (group.projects?.nodes?.length) { %>
-
       <table class="table table-striped">
         <thead>
           <tr>
@@ -25,17 +25,28 @@
           <% for (const project of group.projects.nodes) { %>
           <tr>
             <td class="w-50">
-              <a href="<%= project.webUrl %>"><%= project.name %></a>
+              <div style="display: flex">
+                <% if (project.avatarUrl) { %>
+                <img src="<%= project.avatarUrl %>" width="30px" alt="avatar" />
+                <% } %>
+                <a href="<%= project.webUrl %>"><%= project.name %></a>
+              </div>
               <p><%= group.fullPath %><%= project.path %></p>
-              <% if (project.avatarUrl) { %>
-              <img src="<%= project.avatarUrl %>" width="30px" alt="avatar" />
-              <% } %>
             </td>
             <td class="w-20"><%= project.repository.tree.lastCommit.authoredDate.slice(0, 10)%></td>
             <td class="w-30">
-              Username: <%= project.repository.tree.lastCommit.author.username %> <br />
-              Name: <%=project.repository.tree.lastCommit.author.name %>
-              <img src="<%= project.repository.tree.lastCommit.authorGravatar %>" width="30px" alt="avatar" />
+              <div style="display: flex; align-items: center; gap: 5px">
+                <img
+                  src="<%= project.repository.tree.lastCommit.authorGravatar %>"
+                  width="30px"
+                  height="30px"
+                  alt="avatar"
+                />
+                <div>
+                  Username: <%= project.repository.tree.lastCommit.author.username %> <br />
+                  Name: <%=project.repository.tree.lastCommit.author.name %>
+                </div>
+              </div>
             </td>
           </tr>
           <% } %>

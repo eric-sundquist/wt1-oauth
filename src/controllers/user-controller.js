@@ -102,7 +102,6 @@ export class UserController {
     const viewData = {
       groups: data.currentUser.groups
     }
-    console.log(viewData)
     res.render('user/group-projects', { viewData })
   }
 
@@ -145,14 +144,6 @@ export class UserController {
     return response.json()
   }
 
-  // async checkResponse(res, next) {
-  //   if (!response.ok) {
-  //     const error = new Error(`${response.status} - ${response.statusText} - Fetch from ${url} failed`)
-  //     next(error)
-  //     return
-  //   }
-  // }
-
   async getToken(req) {
     if (this.isTokenExpired(req.session.authData.expires_in, req.session.authData.created_at)) {
       const refreshAccessTokenUrl = `https://gitlab.lnu.se/oauth/token?client_id=${process.env.GITLAB_APP_ID}&client_secret=${process.env.GITLAB_APP_SECRET}&refresh_token=${req.session.authData.refresh_token}&grant_type=refresh_token&redirect_uri=${process.env.GITLAB_REDIRECT_URI}`
@@ -172,27 +163,5 @@ export class UserController {
     const tokenExpires = expiresIn + createdAt
     // Indicates token as expired 5 sec early to give some margin.
     return timeNow > tokenExpires - 5
-  }
-
-  // ------------------------------------------------------------------------------------------
-  //---------------------------------------------------------------------------------
-
-  /**
-   * Displays snippet list.
-   *
-   * @param {object} req - Express request object.
-   * @param {object} res - Express response object.
-   * @param {Function} next - Express next middleware function.
-   */
-  async index(req, res, next) {
-    try {
-      const viewData = {
-        snippets: (await Snippet.find()).map((snippet) => snippet.toObject())
-      }
-
-      res.render('snippets/index', { viewData })
-    } catch (error) {
-      next(error)
-    }
   }
 }

@@ -21,18 +21,3 @@ router.get('/activities', accountController.authLoggedIn, (req, res, next) => co
 router.get('/group-projects', accountController.authLoggedIn, (req, res, next) =>
   controller.showGroupProjects(req, res, next)
 )
-
-// router.get('/:id/update', controller.authLoggedIn, controller.authOwner, (req, res, next) =>
-//   controller.update(req, res, next)
-// )
-// router.post('/:id/update', controller.authLoggedIn, controller.authOwner, (req, res, next) =>
-//   controller.updatePost(req, res, next)
-// )
-
-// router.get('/:id/delete', controller.authLoggedIn, controller.authOwner, (req, res, next) =>
-//   controller.delete(req, res, next)
-// )
-// router.post('/:id/delete', controller.authLoggedIn, controller.authOwner, (req, res, next) =>
-//   controller.deletePost(req, res, next)
-// )
-// router.get('/:id/show', (req, res, next) => controller.show(req, res, next))
