@@ -99,7 +99,9 @@ export class UserController {
     }
     `
     const { data } = await this.fetchGraphQl(query, await this.getToken(req), next)
-    const viewData = data
+    const viewData = {
+      groups: data.currentUser.groups
+    }
     console.log(viewData)
     res.render('user/group-projects', { viewData })
   }

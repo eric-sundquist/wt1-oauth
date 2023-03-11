@@ -1,26 +1,59 @@
 <h1>Group Projects</h1>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Title:</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (viewData?.snippets?.length) { %>
-      <% for (const snippet of viewData.snippets) { %>
-        <tr>
-        
-          <td class="w-100">
-            <a href="./snippets/<%= snippet.id %>/show""><%= snippet.title %></a>
-          </td>
-        </tr>
+<% if (viewData?.groups?.nodes?.length) { %>
+<div class="container" style="margin-bottom: 1rem">
+  <% for (const group of viewData.groups.nodes) { %>
+  <div class="card" style="margin-bottom: 1rem">
+    <div class="card-body">
+      <h5 class="card-title"><a href="<%= group.webUrl %>"><%= group.name %></a></h5>
+
+      <% if (group.avatarUrl) { %>
+      <img src="<%= group.avatarUrl %>" width="30px" alt="avatar" />
       <% } %>
+      <p class="card-text"><%= group.fullPath %></p>
+
+      <% if (group.projects?.nodes?.length) { %>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Project:</th>
+            <th>Last Commit:</th>
+            <th>Commited by:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const project of group.projects.nodes) { %>
+          <tr>
+            <td class="w-50">
+              <a href="<%= project.webUrl %>"><%= project.name %></a>
+              <p><%= group.fullPath %><%= project.path %></p>
+              <% if (project.avatarUrl) { %>
+              <img src="<%= project.avatarUrl %>" width="30px" alt="avatar" />
+              <% } %>
+            </td>
+            <td class="w-20"><%= project.repository.tree.lastCommit.authoredDate.slice(0, 10)%></td>
+            <td class="w-30">
+              Username: <%= project.repository.tree.lastCommit.author.username %> <br />
+              Name: <%=project.repository.tree.lastCommit.author.name %>
+              <img src="<%= project.repository.tree.lastCommit.authorGravatar %>" width="30px" alt="avatar" />
+            </td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+      <% if (group.projects.pageInfo.hasNextPage) { %>
+      <b>There are more projects...</b>
+      <% } %>
+    </div>
     <% } else { %>
-      <tr>
-        <td colspan="3" class="text-center text-danger">
-          There are no projects to display
-        </td>
-      </tr>
+    <b> There are no projects to display </b>
     <% } %>
-  </tbody>
-</table>
+  </div>
+  <% } %> <% if (viewData.groups.pageInfo.hasNextPage) { %>
+  <b>There are more groups...</b>
+  <% } %>
+</div>
+
+<% } else { %>
+<b> There are no groups to display </b>
+<% } %>
