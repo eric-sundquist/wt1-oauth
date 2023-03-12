@@ -10,7 +10,7 @@
  */
 export class UserController {
   /**
-   * Displays user profile.
+   * Fetch and display user information.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
@@ -23,7 +23,7 @@ export class UserController {
   }
 
   /**
-   * Displays activities.
+   * Fetch and display data about user activities.
    *
    * @param {object} req - Express request object.
    * @param {object} res - Express response object.
@@ -31,10 +31,8 @@ export class UserController {
    */
   async showActivities(req, res, next) {
     const accessToken = await this.getToken(req, next)
-    const response = await this.fetchResponse(
-      `https://gitlab.lnu.se/api/v4/events?access_token=${accessToken}&per_page=100`,
-      next
-    )
+    const response = await fetch(`https://gitlab.lnu.se/api/v4/events?access_token=${accessToken}&per_page=100`)
+    this.checkResponseErrorHandling(response, next)
 
     let viewData = { events: await response.json() }
     const totalEvents = response.headers.get('x-total')
@@ -104,6 +102,14 @@ export class UserController {
     res.render('user/group-projects', { viewData })
   }
 
+  /**
+   * Fetch data from the gitlab graphql api.
+   *
+   * @param {string} query
+   * @param {string} accessToken
+   * @param {Function} next - Express next middleware function.
+   * @returns {Promise} resolves into the fetched data.
+   */
   async fetchGraphQl(query, accessToken, next) {
     const url = 'https://gitlab.lnu.se/api/graphql'
     const response = await fetch(url, {
@@ -119,18 +125,26 @@ export class UserController {
     return response.json()
   }
 
-  async fetchResponse(url, next) {
-    const response = await fetch(url)
-    this.checkResponseErrorHandling(response, next)
-    return response
-  }
-
+  /**
+   * Fetch, checks response and
+   *
+   * @param {string} url - the url to fetch from.
+   * @param {Function} next - Express next middleware function.
+   * @returns {Promise} resolves into json data.
+   */
   async fetchData(url, next) {
     const response = await fetch(url)
     this.checkResponseErrorHandling(response, next)
     return response.json()
   }
 
+  /**
+   * Checks if fetch response is ok. Else handles error.
+   *
+   * @param {object} response
+   * @param {Function} next - Express next middleware function.
+   * @returns
+   */
   checkResponseErrorHandling(response, next) {
     if (!response.ok) {
       const error = new Error(`${response.status} - ${response.statusText} - Fetch from ${url} failed`)
@@ -139,6 +153,13 @@ export class UserController {
     }
   }
 
+  /**
+   * Returns gitlab access token. If expired fetches a new one with refresh token.
+   *
+   * @param {object} req - Express request object.
+   * @param {Function} next - Express next middleware function.
+   * @returns {string} gitlab access token.
+   */
   async getToken(req, next) {
     if (this.isTokenExpired(req.session.authData.expires_in, req.session.authData.created_at)) {
       const refreshAccessTokenUrl = `https://gitlab.lnu.se/oauth/token?client_id=${process.env.GITLAB_APP_ID}&client_secret=${process.env.GITLAB_APP_SECRET}&refresh_token=${req.session.authData.refresh_token}&grant_type=refresh_token&redirect_uri=${process.env.GITLAB_REDIRECT_URI}`
@@ -153,7 +174,13 @@ export class UserController {
       return req.session.authData.access_token
     }
   }
-
+  /**
+   * Checks if token is expired.
+   *
+   * @param {String} createdAt - time of token creation unix time in seconds.
+   * @param {String} expiresIn - life time of token in seconds.
+   * @returns {boolean} is the token expired?
+   */
   isTokenExpired(createdAt, expiresIn) {
     const timeNow = Math.floor(Date.now() / 1000)
     const tokenExpires = expiresIn + createdAt
