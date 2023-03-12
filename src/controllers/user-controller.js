@@ -17,7 +17,7 @@ export class UserController {
    * @param {Function} next - Express next middleware function.
    */
   async showProfile(req, res, next) {
-    const accessToken = await this.getToken(req)
+    const accessToken = await this.getToken(req, next)
     const viewData = await this.fetchData(`https://gitlab.lnu.se/api/v4/user?access_token=${accessToken}`, next)
     res.render('user/profile', { viewData })
   }
@@ -30,7 +30,7 @@ export class UserController {
    * @param {Function} next - Express next middleware function.
    */
   async showActivities(req, res, next) {
-    const accessToken = await this.getToken(req)
+    const accessToken = await this.getToken(req, next)
     const response = await this.fetchResponse(
       `https://gitlab.lnu.se/api/v4/events?access_token=${accessToken}&per_page=100`,
       next
@@ -57,7 +57,6 @@ export class UserController {
    * @param {Function} next - Express next middleware function.
    */
   async showGroupProjects(req, res, next) {
-    // fetch user information
     const query = ` 
     query {
       currentUser {
@@ -98,7 +97,7 @@ export class UserController {
       }
     }
     `
-    const { data } = await this.fetchGraphQl(query, await this.getToken(req), next)
+    const { data } = await this.fetchGraphQl(query, await this.getToken(req, next), next)
     const viewData = {
       groups: data.currentUser.groups
     }
@@ -116,39 +115,36 @@ export class UserController {
       },
       body: JSON.stringify({ query })
     })
-    if (!response.ok) {
-      const error = new Error(`${response.status} - ${response.statusText} - Fetch from ${url} failed`)
-      next(error)
-      return
-    }
+    this.checkResponseErrorHandling(response, next)
     return response.json()
   }
 
   async fetchResponse(url, next) {
     const response = await fetch(url)
-    if (!response.ok) {
-      const error = new Error(`${response.status} - ${response.statusText} - Fetch from ${url} failed`)
-      next(error)
-      return
-    }
+    this.checkResponseErrorHandling(response, next)
     return response
   }
 
   async fetchData(url, next) {
     const response = await fetch(url)
+    this.checkResponseErrorHandling(response, next)
+    return response.json()
+  }
+
+  checkResponseErrorHandling(response, next) {
     if (!response.ok) {
       const error = new Error(`${response.status} - ${response.statusText} - Fetch from ${url} failed`)
       next(error)
       return
     }
-    return response.json()
   }
 
-  async getToken(req) {
+  async getToken(req, next) {
     if (this.isTokenExpired(req.session.authData.expires_in, req.session.authData.created_at)) {
       const refreshAccessTokenUrl = `https://gitlab.lnu.se/oauth/token?client_id=${process.env.GITLAB_APP_ID}&client_secret=${process.env.GITLAB_APP_SECRET}&refresh_token=${req.session.authData.refresh_token}&grant_type=refresh_token&redirect_uri=${process.env.GITLAB_REDIRECT_URI}`
 
       const response = await this.fetchData(refreshAccessTokenUrl)
+      this.checkResponseErrorHandling(response, next)
       const data = await response.json()
       req.session.authData = data
 
