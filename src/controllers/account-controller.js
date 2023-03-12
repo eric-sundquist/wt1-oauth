@@ -37,8 +37,6 @@ export class AccountController {
    */
   async authGitlabGetAccessToken(req, res, next) {
     // Verify that recieved state token is the same as sent
-    // console.log(req.session.authStateToken)
-    // console.log(req.query.state)
     if (req.session.authStateToken !== req.query.state) {
       const error = new Error('Something went wrong during authentication')
       error.status = 500

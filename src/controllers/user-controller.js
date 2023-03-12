@@ -1,5 +1,5 @@
 /**
- * Module for the SnippetsController.
+ * Module for the UserController.
  *
  * @author Eric Sundqvist
  * @version 1.0.0
